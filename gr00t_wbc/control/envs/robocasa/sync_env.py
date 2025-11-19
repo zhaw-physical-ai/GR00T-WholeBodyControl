@@ -10,7 +10,9 @@ from robosuite.environments.robot_env import RobotEnv
 from scipy.spatial.transform import Rotation as R
 
 from gr00t_wbc.control.envs.g1.utils.joint_safety import JointSafetyMonitor
-from gr00t_wbc.control.envs.robocasa.utils.controller_utils import update_robosuite_controller_configs
+from gr00t_wbc.control.envs.robocasa.utils.controller_utils import (
+    update_robosuite_controller_configs,
+)
 from gr00t_wbc.control.envs.robocasa.utils.robocasa_env import (  # noqa: F401
     ALLOWED_LANGUAGE_CHARSET,
     Gr00tLocomanipRoboCasaEnv,
@@ -183,7 +185,7 @@ class SyncEnv(gym.Env):
         # Add state keys for model input
         obs = prepare_observation_for_eval(self.robot_model, obs)
 
-        obs["language.language_instruction"] = raw_obs["language.language_instruction"]
+        obs["annotation.human.task_description"] = raw_obs["language.language_instruction"]
 
         if hasattr(self.base_env, "get_privileged_obs_keys"):
             for key in self.base_env.get_privileged_obs_keys():
@@ -205,7 +207,7 @@ class SyncEnv(gym.Env):
     def get_observation(self):
         return self.base_env._get_observations()  # assumes base env is robosuite
 
-    def get_step_info(self) -> Dict[str, any]:
+    def get_step_info(self) -> Tuple[Dict[str, any], float, bool, bool, Dict[str, any]]:
         return (
             self.observe(),
             self.cache["reward"],
@@ -319,7 +321,7 @@ class SyncEnv(gym.Env):
 
         obs_space = prepare_gym_space_for_eval(self.robot_model, obs_space)
 
-        obs_space["language.language_instruction"] = gym.spaces.Text(
+        obs_space["annotation.human.task_description"] = gym.spaces.Text(
             max_length=256, charset=ALLOWED_LANGUAGE_CHARSET
         )
 
